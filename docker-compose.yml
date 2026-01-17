@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017/fooddelivery
+      - PORT=4000
+    depends_on:
+      - mongodb
+    volumes:
+      - ./backend/uploads:/app/uploads
+    
+    networks:
+      - foodnet
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    ports:
+      - "3000:80"
+    
+    depends_on:
+      - backend
+    networks:
+      - foodnet
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: dockerfile
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+    networks:
+      - foodnet
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - foodnet
+
+networks:
+    foodnet:
+      driver: bridge
+
+volumes:
+    mongodb_data:
+
+
+
+
